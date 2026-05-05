@@ -2,7 +2,7 @@
 
 A Generative-AI-first prototype that maps HS codes, local tariff codes, and free-form product descriptions between China's customs nomenclature (海关进出口税则) and Indonesia's BTKI 2022, with traceable confidence scoring and tariff data.
 
-**Live demo:** _add your GitHub Pages URL after deployment_
+**Live demo:** https://jvnjhnsn.github.io/tarriff-mapper-china-id/
 
 ---
 
