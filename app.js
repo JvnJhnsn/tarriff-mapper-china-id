@@ -252,10 +252,15 @@ async function findMatches(rawInput, sourceCountry, targetCountry, useAI) {
 }
 
 // ============================================================================
-// AI SEMANTIC RANKING — uses Anthropic API via user-supplied key
+// AI SEMANTIC RANKING — uses Google Gemini API (free tier, no card required)
 // ============================================================================
+// Why Gemini Flash: free tier provides 15 req/min and 1500 req/day with no
+// payment method required, sufficient for prototype demos. Get a key at
+// https://aistudio.google.com/apikey — sign in with Google, click "Create
+// API key", copy. Stored in browser localStorage only; never sent elsewhere
+// except Google's API endpoint.
 async function aiSemanticRank(query, candidates) {
-  const apiKey = localStorage.getItem("anthropic_api_key");
+  const apiKey = localStorage.getItem("gemini_api_key");
   if (!apiKey) throw new Error("No API key set");
 
   const candidatesText = candidates.map((c, i) =>
@@ -272,18 +277,18 @@ ${candidatesText}
 Respond ONLY with a JSON array of numbers, one per candidate, in order. Example: [0.9, 0.4, 0.1, 0.05, 0.0]
 No explanation, no markdown, just the array.`;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 200,
-      messages: [{ role: "user", content: prompt }]
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 200,
+        responseMimeType: "application/json"
+      }
     })
   });
 
@@ -293,7 +298,7 @@ No explanation, no markdown, just the array.`;
   }
 
   const data = await response.json();
-  const text = data.content.find(b => b.type === "text")?.text || "[]";
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
   const cleaned = text.replace(/```json|```/g, "").trim();
   const match = cleaned.match(/\[[\d.,\s]+\]/);
   if (!match) throw new Error("Could not parse AI response");
@@ -316,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const apiKeyStatus = document.getElementById("key-status");
 
   // Restore saved key
-  const savedKey = localStorage.getItem("anthropic_api_key");
+  const savedKey = localStorage.getItem("gemini_api_key");
   if (savedKey) {
     apiKeyStatus.textContent = "✓ API key saved (using AI semantic matching)";
     apiKeyStatus.className = "key-status saved";
@@ -326,13 +331,13 @@ document.addEventListener("DOMContentLoaded", () => {
   apiKeySaveBtn.addEventListener("click", () => {
     const key = apiKeyInput.value.trim();
     if (key) {
-      localStorage.setItem("anthropic_api_key", key);
+      localStorage.setItem("gemini_api_key", key);
       apiKeyStatus.textContent = "✓ API key saved";
       apiKeyStatus.className = "key-status saved";
       apiKeyInput.value = "";
       aiToggle.checked = true;
     } else {
-      localStorage.removeItem("anthropic_api_key");
+      localStorage.removeItem("gemini_api_key");
       apiKeyStatus.textContent = "Key cleared — using lexical matching only";
       apiKeyStatus.className = "key-status";
       aiToggle.checked = false;
@@ -364,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const source = sourceSel.value;
     const target = source === "china" ? "indonesia" : "china";
-    const useAI = aiToggle.checked && !!localStorage.getItem("anthropic_api_key");
+    const useAI = aiToggle.checked && !!localStorage.getItem("gemini_api_key");
 
     resultsEl.innerHTML = "";
     loaderEl.classList.add("active");
