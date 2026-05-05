@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tariff Crosswalk · China ↔ Indonesia</title>
+  <meta name="description" content="AI-powered HS code and tariff classification mapping between China and Indonesia. Search by product description, HS code, or local tariff code." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80' font-family='Georgia'%3E§%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ========== MASTHEAD ========== -->
+    <header class="masthead">
+      <div class="masthead-top">
+        <span>HS Crosswalk Prototype</span>
+        <span class="vol">Vol. I · No. 1 · May 2026</span>
+        <span>AI-Powered Classification</span>
+      </div>
+
+      <h1 class="title">Tariff <span class="accent">Crosswalk</span></h1>
+
+      <p class="subtitle">
+        A traceable mapping engine between Chinese customs codes and Indonesia's BTKI nomenclature — anchored in WCO HS 2022, augmented with semantic AI ranking, and explained in plain language.
+      </p>
+
+      <div class="flags">
+        <span><span class="flag-dot cn"></span>China · 海关税则</span>
+        <span class="flag-arrow">⇌</span>
+        <span><span class="flag-dot id"></span>Indonesia · BTKI</span>
+      </div>
+    </header>
+
+    <!-- ========== API KEY PANEL ========== -->
+    <div class="api-panel">
+      <div class="api-panel-info">
+        <strong>Semantic AI Matching</strong> — paste an Anthropic API key (<code>sk-ant-…</code>) to enable Claude-powered semantic ranking. Stored locally in your browser only; never sent to a server. Without a key, the app falls back to lexical + HS-structural matching, which is still functional.
+      </div>
+      <div class="api-controls">
+        <input type="password" id="api-key" placeholder="sk-ant-api03-…" autocomplete="off" />
+        <button id="save-key" type="button">Save</button>
+        <label class="ai-toggle-wrap">
+          <input type="checkbox" id="ai-toggle" /> Use AI
+        </label>
+      </div>
+      <div class="key-status" id="key-status">No API key — using lexical matching only</div>
+    </div>
+
+    <!-- ========== SEARCH ========== -->
+    <section class="search-panel">
+      <form id="search-form">
+        <div class="search-row">
+          <div class="country-select-wrap">
+            <select id="source-country">
+              <option value="china">From China</option>
+              <option value="indonesia">From Indonesia</option>
+            </select>
+            <span id="target-country-label">→ Indonesia</span>
+          </div>
+          <input
+            type="text"
+            id="query"
+            placeholder="Product description, HS code (e.g. 851712), or local code (e.g. 6109.10.00)…"
+            autocomplete="off"
+            required
+          />
+          <button type="submit" class="submit-btn">Search</button>
+        </div>
+      </form>
+
+      <div class="examples">
+        <span class="examples-label">Try:</span>
+        <button class="example-chip" type="button" data-source="china" data-query="smartphone">Smartphone (description)</button>
+        <button class="example-chip" type="button" data-source="china" data-query="851712"><code>851712</code> HS-6</button>
+        <button class="example-chip" type="button" data-source="indonesia" data-query="6109.10.00"><code>6109.10.00</code> BTKI</button>
+        <button class="example-chip" type="button" data-source="china" data-query="cotton t-shirt for men">Vague description</button>
+        <button class="example-chip" type="button" data-source="indonesia" data-query="kopi mentah arabika">Indonesian: kopi mentah</button>
+        <button class="example-chip" type="button" data-source="china" data-query="塑料袋">Chinese: 塑料袋</button>
+      </div>
+    </section>
+
+    <!-- ========== RESULTS ========== -->
+    <div class="loader" id="loader">Computing matches</div>
+    <section class="results" id="results"></section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="colophon">
+      <span>Prototype · Not a customs binding ruling</span>
+      <span>Data: WCO HS 2022 · BTKI 2022 · China Customs Tariff · ACFTA</span>
+      <span>Built with Claude AI</span>
+    </footer>
+
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
